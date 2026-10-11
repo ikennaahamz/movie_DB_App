@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Movie Library | Movie_DB_App</title>
+<link rel="stylesheet" href="styles.css?v=2" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header>
+  <h1>Movie Library</h1>
+  <nav>
+    <button data-screen="login" class="active">Login</button>
+    <button data-screen="movies">Movies</button>
+    <button data-screen="people">People & Genres</button>
+    <button data-screen="users">Users & Roles</button>
+    <button data-screen="reviews">Reviews & Reports</button>
+  </nav>
+  <span id="loginStatus" style="margin-left:auto">Not logged in</span>
+</header>
+
+<main>
+  <!-- SCREEN 1: LOGIN -->
+  <section id="screen-login" class="screen active">
+    <h2>Welcome back</h2>
+    <p class="hint">Sign in with a demo account: admin1, emp1, or cust1.</p>
+    <div class="form-row">
+      <input id="loginUser" aria-label="Username" autocomplete="username" placeholder="Username (e.g. admin1)" />
+      <button class="action" onclick="login()">Login</button>
+      <button onclick="logout()">Logout</button>
+    </div>
+    <p id="loginMsg"></p>
+    <h3>Role access</h3>
+    <ul>
+      <li><b>admin</b>: full access incl. Users & Roles screen</li>
+      <li><b>employee / technical_staff</b>: manage movies, people</li>
+      <li><b>customer</b>: browse + add reviews</li>
+    </ul>
+  </section>
+
+  <!-- SCREEN 2: MOVIES -->
+  <section id="screen-movies" class="screen">
+    <h2>Movies</h2>
+    <div class="form-row">
+      <input id="mTitle" aria-label="Movie title" placeholder="Title" />
+      <input id="mYear" aria-label="Release year" type="number" placeholder="Year" style="width:90px" />
+      <input id="mDur" aria-label="Duration in minutes" type="number" placeholder="Minutes" style="width:100px" />
+      <select id="mDirector" aria-label="Director"></select>
+      <select id="mGenre" aria-label="Genre"></select>
+      <button class="action" onclick="addMovie()">Add movie</button>
+      <button onclick="loadMovies()">Refresh list</button>
+    </div>
+    <table><thead><tr><th>ID</th><th>Title</th><th>Year</th><th>Min</th><th>Director</th><th>Genre</th><th>Avg</th><th>Actions</th></tr></thead>
+    <tbody id="moviesBody"></tbody></table>
+    <h3>Add a cast member</h3>
+    <div class="form-row">
+      <select id="maMovie" aria-label="Movie"></select>
+      <select id="maActor" aria-label="Actor"></select>
+      <input id="maChar" aria-label="Character name" placeholder="Character name" />
+      <button class="action" onclick="addMovieActor()">Add to cast</button>
+    </div>
+  </section>
+
+  <!-- SCREEN 3: PEOPLE & GENRES -->
+  <section id="screen-people" class="screen">
+    <h2>People &amp; genres</h2>
+    <div class="form-row">
+      <input id="dName" aria-label="Director name" placeholder="Director name" /><button class="action" onclick="addDirector()">Add director</button>
+      <input id="aName" aria-label="Actor name" placeholder="Actor name" /><button class="action" onclick="addActor()">Add actor</button>
+      <input id="gName" aria-label="Genre name" placeholder="Genre" /><button class="action" onclick="addGenre()">Add genre</button>
+      <button onclick="loadPeople()">Show All</button>
+    </div>
+    <h3>Directors</h3><table><tbody id="directorsBody"></tbody></table>
+    <h3>Actors</h3><table><tbody id="actorsBody"></tbody></table>
+    <h3>Genres</h3><table><tbody id="genresBody"></tbody></table>
+  </section>
+
+  <!-- SCREEN 4: USERS -->
+  <section id="screen-users" class="screen">
+    <h2>Users &amp; roles</h2>
+    <p class="hint">Requires login as admin1. Demonstrates authentication table + groups.</p>
+    <div class="form-row">
+      <input id="uName" aria-label="Username" placeholder="Username" />
+      <input id="uEmail" aria-label="Email" type="email" placeholder="Email" />
+      <input id="uFull" aria-label="Full name" placeholder="Full name" />
+      <select id="uGroup" aria-label="User role"></select>
+      <button class="action" onclick="addUser()">Add user</button>
+      <button onclick="loadUsers()">Show Users</button>
+    </div>
+    <table><thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Group</th><th>Active</th><th>Actions</th></tr></thead>
+    <tbody id="usersBody"></tbody></table>
+  </section>
+
+  <!-- SCREEN 5: REVIEWS & REPORTS -->
+  <section id="screen-reviews" class="screen">
+    <h2>Reviews &amp; reports</h2>
+    <div class="form-row">
+      <select id="rMovie" aria-label="Movie"></select>
+      <select id="rUser" aria-label="Reviewer"></select>
+      <select id="rRating" aria-label="Rating"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select>
+      <input id="rComment" aria-label="Review comment" placeholder="Comment" />
+      <button class="action" onclick="addReview()">Add review</button>
+      <button onclick="loadReviews()">Refresh reviews</button>
+    </div>
+    <table><thead><tr><th>ID</th><th>Movie</th><th>User</th><th>Rating</th><th>Comment</th><th>Action</th></tr></thead>
+    <tbody id="reviewsBody"></tbody></table>
+    <h3>Reports (runs queries.sql logic via Supabase)</h3>
+    <div class="form-row">
+      <button onclick="reportMoviesPerGenre()">Movies per Genre</button>
+      <button onclick="reportTopRated()">Top Rated</button>
+      <button onclick="reportStats()">Overall Stats</button>
+    </div>
+    <pre id="reportOut">Report output appears here...</pre>
+  </section>
+</main>
+
+<script src="supabaseClient.js"></script>
+<script src="app.js"></script>
+<script>
+document.querySelectorAll('nav button').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById('screen-'+b.dataset.screen).classList.add('active');
+  };
+});
+</script>
+</body>
+</html>
