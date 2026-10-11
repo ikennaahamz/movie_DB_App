@@ -1,5 +1,8 @@
 # Movie_DB_App - CMPE344 Term Project
 
+Live demo: https://moviedbapp-three.vercel.app/app/index.html
+Repo: https://github.com/ikennaahamz/movie_DB_App
+
 Movie database with login + roles, deployed on Supabase + static web hosting.
 Stack: **Supabase (Postgres) + HTML/JS** - no backend needed.
 
